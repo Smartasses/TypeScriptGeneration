@@ -1,6 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>TypeScriptGeneration.RequestHandlers</AssemblyName>
+    <PackageId>TypeScriptGeneration.RequestHandlers</PackageId>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\TypeScriptGeneration\TypeScriptGeneration.csproj" />
