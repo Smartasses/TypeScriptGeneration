@@ -8,7 +8,7 @@
     <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\TypeScriptGeneration\TypeScriptGeneration.csproj" />
+    <ProjectReference Include="..\TypeScriptGeneration.Core\TypeScriptGeneration.Core.csproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="RequestHandlers" Version="3.1.12" />

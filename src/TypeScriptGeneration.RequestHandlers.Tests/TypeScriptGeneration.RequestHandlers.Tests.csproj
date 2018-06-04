@@ -12,7 +12,7 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\TypeScriptGeneration.Core\TypeScriptGeneration.Core.csproj" />
     <ProjectReference Include="..\TypeScriptGeneration.RequestHandlers\TypeScriptGeneration.RequestHandlers.csproj" />
-    <ProjectReference Include="..\TypeScriptGeneration\TypeScriptGeneration.csproj" />
   </ItemGroup>
 </Project>

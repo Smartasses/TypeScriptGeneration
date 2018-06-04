@@ -3,13 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.0.0
 MinimumVisualStudioVersion = 10.0.0.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypeScriptGeneration", "TypeScriptGeneration\TypeScriptGeneration.csproj", "{A93FDAEE-028F-46F8-921D-5CF263EAE910}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypeScriptGeneration.Tests", "TypeScriptGeneration.Tests\TypeScriptGeneration.Tests.csproj", "{E802164A-7879-4968-BFC5-B5F0B166FE3B}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypeScriptGeneration.RequestHandlers", "TypeScriptGeneration.RequestHandlers\TypeScriptGeneration.RequestHandlers.csproj", "{51300202-3490-4EBD-A3A1-D6037C2F4024}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypeScriptGeneration.RequestHandlers.Tests", "TypeScriptGeneration.RequestHandlers.Tests\TypeScriptGeneration.RequestHandlers.Tests.csproj", "{8CCF7504-5B21-467B-939A-C22FAD2C6EF1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypeScriptGeneration.Core", "TypeScriptGeneration.Core\TypeScriptGeneration.Core.csproj", "{7C9202A7-ADB4-4296-8444-93571CD0B203}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TypeScriptGeneration.Core.Tests", "TypeScriptGeneration.Core.Tests\TypeScriptGeneration.Core.Tests.csproj", "{D5F66753-4EAD-40CD-A886-58358DABDEDD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,14 +17,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A93FDAEE-028F-46F8-921D-5CF263EAE910}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A93FDAEE-028F-46F8-921D-5CF263EAE910}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A93FDAEE-028F-46F8-921D-5CF263EAE910}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A93FDAEE-028F-46F8-921D-5CF263EAE910}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E802164A-7879-4968-BFC5-B5F0B166FE3B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E802164A-7879-4968-BFC5-B5F0B166FE3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E802164A-7879-4968-BFC5-B5F0B166FE3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E802164A-7879-4968-BFC5-B5F0B166FE3B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{51300202-3490-4EBD-A3A1-D6037C2F4024}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{51300202-3490-4EBD-A3A1-D6037C2F4024}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{51300202-3490-4EBD-A3A1-D6037C2F4024}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -33,6 +25,14 @@ Global
 		{8CCF7504-5B21-467B-939A-C22FAD2C6EF1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8CCF7504-5B21-467B-939A-C22FAD2C6EF1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8CCF7504-5B21-467B-939A-C22FAD2C6EF1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7C9202A7-ADB4-4296-8444-93571CD0B203}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7C9202A7-ADB4-4296-8444-93571CD0B203}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7C9202A7-ADB4-4296-8444-93571CD0B203}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7C9202A7-ADB4-4296-8444-93571CD0B203}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D5F66753-4EAD-40CD-A886-58358DABDEDD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D5F66753-4EAD-40CD-A886-58358DABDEDD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D5F66753-4EAD-40CD-A886-58358DABDEDD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D5F66753-4EAD-40CD-A886-58358DABDEDD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
