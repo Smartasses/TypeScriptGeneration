@@ -51,10 +51,17 @@ namespace TypeScriptGeneration
                     FilePath = directory + fileName
                 };
                 _generatedTypes.Add(type, result);
-                var converter = Configuration.Converters.First(x => x.CanConvertType(type));
-                var ts = converter.ConvertType(type, localContext);
-                result.Imports = localContext.Imports.Values;
-                result.Content = ts.Trim();
+                try
+                {
+                    var converter = Configuration.Converters.First(x => x.CanConvertType(type));
+                    var ts = converter.ConvertType(type, localContext);
+                    result.Imports = localContext.Imports.Values;
+                    result.Content = ts.Trim();
+                }
+                catch
+                {
+                    throw new Exception($"Failed to convert {type}");
+                }
             }
             return result;
         }
