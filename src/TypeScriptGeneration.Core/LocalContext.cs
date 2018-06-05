@@ -63,6 +63,14 @@ namespace TypeScriptGeneration
                     return TypeScriptType.Array(GetTypeScriptType(enumerable.GetTypeInfo().GetGenericArguments()[0]));
                 }
             }
+    
+            {
+                var taskType = TypeHelper.GetTaskType(actualType);
+                if (taskType != null)
+                {
+                    return GetTypeScriptType(taskType.GetTypeInfo().GetGenericArguments()[0]);
+                }
+            }
 
             {
                 if (actualType.IsConstructedGenericType)
