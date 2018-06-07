@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using TypeScriptGeneration.TypeScriptTypes;
 
 namespace TypeScriptGeneration
 {
@@ -9,5 +10,6 @@ namespace TypeScriptGeneration
         public ICollection<TypeScriptResult> Imports { get; set; }
         public string Content { get; set; }
         public string FilePath { get; set; }
+        public Dictionary<TypeScriptType[], string> ExternalImports { get; set; }
     }
 }

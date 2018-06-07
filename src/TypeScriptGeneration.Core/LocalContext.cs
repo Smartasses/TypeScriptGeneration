@@ -19,9 +19,11 @@ namespace TypeScriptGeneration
             _convertContext = convertContext;
             _type = type;
             Imports = new Dictionary<Type, TypeScriptResult>();
+            ExternalImports = new Dictionary<TypeScriptType[], string>();
         }
         
         public Dictionary<Type, TypeScriptResult> Imports { get; }
+        public Dictionary<TypeScriptType[], string> ExternalImports { get; }
         
         public TypeScriptType GetTypeScriptType(Type type)
         {

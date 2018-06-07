@@ -57,7 +57,8 @@ export{(type.GetTypeInfo().IsAbstract ? " abstract" : "")} class {name}{data.Cla
     constructor({_.Foreach(data.ConstructorArgs, arg => $@"
         {(arg.Expose ? "public " : "")}{arg.Name}?: {arg.TypeScriptType.ToTypeScriptType()},").TrimEnd(',')}) {{{_.Foreach(data.ConstructorLines, line => $@"
         {line}")}
-    }}{_.Foreach(data.Body, line => $@"
+    }}{_.Foreach(data.Body, line => string.IsNullOrEmpty(line) ? @"
+" : $@"
     {line}")}
 }}";
             return generated;

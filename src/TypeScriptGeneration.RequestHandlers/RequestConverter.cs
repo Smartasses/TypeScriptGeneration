@@ -68,7 +68,7 @@ private __request = () => <{context.GetTypeScriptType(httpRequestType).ToTypeScr
         {prop.Parsed.Name}: this.{prop.Parsed.Name} ? this.{prop.Parsed.Name}.toString() : null,").TrimEnd(',')
                 }
     }}
-}};
+}}
 public execute = (dispatcher: {
                     context.GetTypeScriptType(typeof(IRequestDispatcher)).ToTypeScriptType()
                 }) => dispatcher.execute(this.__request());";

@@ -23,7 +23,7 @@ namespace TypeScriptGeneration.RequestHandlers
                     context.GetTypeScriptType(typeof(string)).ToTypeScriptType()
                 };
     {PropName(context, type, nameof(IHttpRequest<object>.Body))}: {
-                    context.GetTypeScriptType(typeof(string)).ToTypeScriptType()
+                    context.GetTypeScriptType(typeof(object)).ToTypeScriptType()
                 };
     {PropName(context, type, nameof(IHttpRequest<object>.QueryString))}: {
                     context.GetTypeScriptType(typeof(Dictionary<string, string>)).ToTypeScriptType()

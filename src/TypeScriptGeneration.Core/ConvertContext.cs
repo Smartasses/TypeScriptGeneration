@@ -56,6 +56,7 @@ namespace TypeScriptGeneration
                     var converter = Configuration.Converters.First(x => x.CanConvertType(type));
                     var ts = converter.ConvertType(type, localContext);
                     result.Imports = localContext.Imports.Values;
+                    result.ExternalImports = localContext.ExternalImports;
                     result.Content = ts.Trim();
                 }
                 catch
@@ -73,8 +74,12 @@ namespace TypeScriptGeneration
             foreach (var typeScriptResult in GeneratedResults)
             {
                 var sb = new StringBuilder();
-                if (typeScriptResult.Imports.Any())
+                if (typeScriptResult.Imports.Any() || typeScriptResult.ExternalImports.Any())
                 {
+                    foreach (var import in typeScriptResult.ExternalImports)
+                    {
+                        sb.AppendLine($"import {{ {string.Join(", ", import.Key.Select(x => x.ToTypeScriptType()))} }} from '{import.Value}';");
+                    }
                     foreach (var import in typeScriptResult.Imports)
                     {
                         var relativePath = GetRelativePath(typeScriptResult.FilePath, import.FilePath);

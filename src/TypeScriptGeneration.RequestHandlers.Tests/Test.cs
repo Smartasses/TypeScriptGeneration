@@ -17,7 +17,7 @@ namespace TypeScriptGeneration.RequestHandlers.Tests
         {
             var engine = new ConvertContext();
             engine.Configuration.AddConverter(new HttpRequestInterfaceConverter());
-            engine.Configuration.AddConverter(new RequestDispatcherConverter());
+            engine.Configuration.AddConverter(new RequestDispatcherConverter(DispatcherResponseType.Observable));
             engine.Configuration.AddConverter(new RequestConverter());
             engine.GenerateForTypes(typeof(TestRequest));
             
@@ -35,9 +35,10 @@ namespace TypeScriptGeneration.RequestHandlers.Tests
 }
 "},
                 {"IRequestDispatcher.ts", @"import { IHttpRequest } from './IHttpRequest';
+import { Observable } from 'rxjs/index';
 
 export interface IRequestDispatcher {
-    execute<TResponse>(request: IHttpRequest<TResponse>);
+    execute<TResponse>(request: IHttpRequest<TResponse>): Observable<TResponse>;
 }
 "},
                 {"TestRequest.ts", @"import { IHttpRequest } from './IHttpRequest';
