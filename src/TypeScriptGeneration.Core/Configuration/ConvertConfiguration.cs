@@ -33,7 +33,7 @@ namespace TypeScriptGeneration
         public ClassConvertConfiguration ClassConfiguration { get; }
 
         public Func<Type, string> GetTypeName { get; set; } = type => type.GetCleanName();
-        public Func<Type, PropertyInfo, string> GetPropertyName { get; set; } = (type, prop) => prop.Name;
+        public Func<Type, PropertyInfo, string> GetPropertyName { get; set; } = (type, prop) => string.IsNullOrEmpty(prop.Name) ? prop.Name : prop.Name.Substring(0, 1).ToLower() + prop.Name.Substring(1);
         public Func<Type, bool> ShouldConvertType { get; set; } = type => true;
         public Func<Type, PropertyInfo, bool> ShouldConvertProperty { get; set; } = (type, prop) => true;
         public Func<Type, string, string> GetEnumValueName { get; set; } = (e, enumValueName) => enumValueName;
