@@ -13,8 +13,8 @@ namespace TypeScriptGeneration.Tests.Converters
             result.Should().BeLike(@"
 export class SimpleClass {
     constructor(
-        public PropertyArray?: Array<string>,
-        public StringProperty?: string) {
+        public propertyArray?: Array<string>,
+        public stringProperty?: string) {
     }
 }");
         }
@@ -47,8 +47,8 @@ export abstract class AbstractClass {
             result.Should().BeLike(@"
 export class GenericClass<T1, T2> {
     constructor(
-        public Prop1?: T1,
-        public Prop2?: T2) {
+        public prop1?: T1,
+        public prop2?: T2) {
     }
 }");
         }
@@ -68,10 +68,10 @@ export class GenericClass<T1, T2> {
             result.Should().BeLike(@"
 export class InheritanceSample extends SimpleClass {
     constructor(
-        PropertyArray?: Array<string>,
-        StringProperty?: string,
-        public IsAwesome?: boolean) {
-        super(PropertyArray, StringProperty);
+        propertyArray?: Array<string>,
+        stringProperty?: string,
+        public isAwesome?: boolean) {
+        super(propertyArray, stringProperty);
     }
 }");
 

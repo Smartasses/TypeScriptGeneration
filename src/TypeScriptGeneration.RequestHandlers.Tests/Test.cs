@@ -28,41 +28,38 @@ namespace TypeScriptGeneration.RequestHandlers.Tests
             var expected = new Dictionary<string, string>
             {
                 {"IHttpRequest.ts", @"export interface IHttpRequest<TResponse> {
-    Method: string;
-    Route: string;
-    Body: string;
-    QueryString: { [key: string]: string };
-}
-"},
-                {"IRequestDispatcher.ts", @"import { IHttpRequest } from './IHttpRequest';
-import { Observable } from 'rxjs/index';
+    method: string;
+    route: string;
+    body: any;
+    queryString: { [key: string]: string };
+}"},
+                {"IRequestDispatcher.ts", @"import { Observable } from 'rxjs/index';
+import { IHttpRequest } from './IHttpRequest';
 
 export interface IRequestDispatcher {
     execute<TResponse>(request: IHttpRequest<TResponse>): Observable<TResponse>;
-}
-"},
+}"},
                 {"TestRequest.ts", @"import { IHttpRequest } from './IHttpRequest';
 import { TestResponse } from './TestResponse';
 import { IRequestDispatcher } from './IRequestDispatcher';
 
 export class TestRequest {
     constructor(
-        public Id?: string) {
+        public id?: string) {
     }
-    
+
     private __request = () => <IHttpRequest<TestResponse>>{
-        Method: 'get',
-        Route: 'api/values/{Id}'.replace('{Id}', this.Id ? this.Id.toString() : ''),
-        Body: undefined,
-        QueryString: {
+        method: 'get',
+        route: 'api/values/{Id}'.replace('{Id}', this.id ? this.id.toString() : ''),
+        body: undefined,
+        queryString: {
         }
-    };
+    }
     public execute = (dispatcher: IRequestDispatcher) => dispatcher.execute(this.__request());
-}
-"},
+}"},
                 {"TestResponse.ts", @"export class TestResponse {
     constructor(
-        public Date?: Date) {
+        public date?: Date) {
     }
 }
 "}

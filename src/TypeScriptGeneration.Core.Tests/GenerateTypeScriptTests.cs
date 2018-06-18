@@ -32,45 +32,42 @@ import { MyGenericTest } from '../../../MyGenericTest';
 
 export class Employee extends Person {
     constructor(
-        FirstName?: string,
-        LastName?: string,
-        public Salary?: number,
-        public Hello?: GenericInheritance<MyGenericTest<string>, string>) {
-        super(FirstName, LastName);
+        firstName?: string,
+        lastName?: string,
+        public salary?: number,
+        public hello?: GenericInheritance<MyGenericTest<string>, string>) {
+        super(firstName, lastName);
     }
-}
-"},
+}"},
                 {"Employer.ts", @"import { Person } from './dto/person/Person';
 
 export class Employer extends Person {
     constructor(
-        FirstName?: string,
-        LastName?: string,
-        public CompanyName?: string) {
-        super(FirstName, LastName);
+        firstName?: string,
+        lastName?: string,
+        public companyName?: string) {
+        super(firstName, lastName);
     }
-}
-"},
+}"},
                 {"GenericInheritance.ts", @"import { MyGenericTest } from './MyGenericTest';
 
 export class GenericInheritance<T1, T2> extends MyGenericTest<T2> {
     constructor(
-        GenericProperty?: T2,
-        public AnotherProperty?: Array<T1>) {
-        super(GenericProperty);
+        genericProperty?: T2,
+        public anotherProperty?: Array<T1>) {
+        super(genericProperty);
     }
-}
-"},
+}"},
                 {"MyGenericTest.ts", @"export class MyGenericTest<T> {
     constructor(
-        public GenericProperty?: T) {
+        public genericProperty?: T) {
     }
 }
 "},
                 {"dto/person/Person.ts", @"export abstract class Person {
     constructor(
-        public FirstName?: string,
-        public LastName?: string) {
+        public firstName?: string,
+        public lastName?: string) {
     }
 }
 "},
