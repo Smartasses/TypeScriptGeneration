@@ -1,9 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net;
 using FluentAssertions;
-using TypeScriptGeneration.Tests.Converters;
 using Xunit;
 
 namespace TypeScriptGeneration.Tests
