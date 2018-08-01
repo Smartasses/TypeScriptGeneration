@@ -12,7 +12,7 @@ namespace TypeScriptGeneration
         /// </summary>
         public bool GenerateAsInterface { get; set; } = false;
 
-        public GenerateConstructorType GenerateConstructorType { get; set; } = GenerateConstructorType.ObjectInitializer;
+        public GenerateConstructorType GenerateConstructorType { get; set; } = GenerateConstructorType.ArgumentPerProperty;
     }
 
     public enum GenerateConstructorType

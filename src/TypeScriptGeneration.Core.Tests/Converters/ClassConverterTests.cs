@@ -7,7 +7,7 @@ namespace TypeScriptGeneration.Tests.Converters
     public class ClassConverterTests
     {
         [Fact]
-        public void ConvertSimpleClass()
+        public void ConvertSimpleClass_Arguments()
         {
             var result = new ClassConverter().ConvertType(typeof(SimpleClass), new LocalContext(new ConvertConfiguration(), null, typeof(SimpleClass)));
             result.Should().BeLike(@"
@@ -16,6 +16,28 @@ export class SimpleClass {
         public propertyArray?: Array<string>,
         public stringProperty?: string) {
     }
+}");
+        }
+        [Fact]
+        public void ConvertSimpleClass_Initializer()
+        {
+            var result = new ClassConverter().ConvertType(typeof(SimpleClass), new LocalContext(new ConvertConfiguration
+            {
+                ClassConfiguration = { GenerateConstructorType = GenerateConstructorType.ObjectInitializer}
+            }, null, typeof(SimpleClass)));
+            result.Should().BeLike(@"
+export class SimpleClass {
+    constructor(init?: {
+        propertyArray?: Array<string>,
+        stringProperty?: string
+    }) {
+        if (init) {
+            this.propertyArray = init.propertyArray;
+            this.stringProperty = init.stringProperty;
+        }
+    }
+    public propertyArray: Array<string>;
+    public stringProperty: string;
 }");
         }
 

@@ -12,20 +12,20 @@ namespace TypeScriptGeneration.Converters
         {
             public Data()
             {
-                ConstructorArgs = new List<ConstructorArg>();
+                Properties = new List<Property>();
                 ConstructorLines = new List<string>();
                 Body = new List<string>();
                 ClassSuffix = "";
             }
-            public List<ConstructorArg> ConstructorArgs { get; set; }
+            public List<Property> Properties { get; set; }
             public List<string> ConstructorLines { get; set; }
             public List<string> Body { get; set; }
             public string ClassSuffix { get; set; }
         }
         
-        public class ConstructorArg
+        public class Property
         {
-            public bool Expose { get; set; }
+            public bool IsDeclared { get; set; }
             public string Name { get; set; }
             public TypeScriptType TypeScriptType { get; set; }
             public PropertyInfo PropertyInfo { get; set; }
@@ -50,11 +50,51 @@ namespace TypeScriptGeneration.Converters
             }
 
             AdditionalGeneration(data, type, context);
+
+            bool generateProperties = true;
+            string constructorArguments;
+            if (context.Configuration.ClassConfiguration.GenerateConstructorType ==
+                GenerateConstructorType.ObjectInitializer)
+            {
+                if (data.Properties.Any())
+                {
+                    constructorArguments = $@"init?: {{{_.Foreach(data.Properties, arg => $@"
+        {arg.Name}?: {arg.TypeScriptType.ToTypeScriptType()},").TrimEnd(',')}
+    }}";
+                    
+                    data.ConstructorLines.InsertRange(0, 
+                        new []{ "if (init) {"}
+                        .Concat(data.Properties.Select(x => $"    this.{x.Name} = init.{x.Name};"))
+                        .Concat(new [] {"}"}));
+                }
+                else
+                {
+                    constructorArguments = "";
+                }
+            } else if (context.Configuration.ClassConfiguration.GenerateConstructorType ==
+                       GenerateConstructorType.ArgumentPerProperty)
+            {
+                constructorArguments = _.Foreach(data.Properties, arg => $@"
+        {(arg.IsDeclared ? "public " : "")}{arg.Name}?: {arg.TypeScriptType.ToTypeScriptType()},").TrimEnd(',');
+                generateProperties = false;
+            }
+            else
+            {
+                constructorArguments = "";
+            }
+
+            if (generateProperties)
+            {
+                data.Body.InsertRange(0, 
+                    data.Properties
+                        .Where(x => x.IsDeclared)
+                        .Select(property => 
+                            $"public {property.Name}: {property.TypeScriptType.ToTypeScriptType()};"));
+            }
             
             var generated = $@"
 export{(type.GetTypeInfo().IsAbstract ? " abstract" : "")} class {name}{data.ClassSuffix} {{
-    constructor({_.Foreach(data.ConstructorArgs, arg => $@"
-        {(arg.Expose ? "public " : "")}{arg.Name}?: {arg.TypeScriptType.ToTypeScriptType()},").TrimEnd(',')}) {{{_.Foreach(data.ConstructorLines, line => $@"
+    constructor({constructorArguments}) {{{_.Foreach(data.ConstructorLines, line => $@"
         {line}")}
     }}{_.Foreach(data.Body, line => string.IsNullOrEmpty(line) ? @"
 " : $@"
@@ -76,17 +116,17 @@ export{(type.GetTypeInfo().IsAbstract ? " abstract" : "")} class {name}{data.Cla
                     BindingFlags.SetProperty | 
                     BindingFlags.GetProperty)
                 .Where(x => context.Configuration.ShouldConvertProperty(type, x))
-                .Select(baseProperty => new ConstructorArg
+                .Select(baseProperty => new Property
                 {
                     Name = context.Configuration.GetPropertyName(type.GetTypeInfo().BaseType, baseProperty),
                     TypeScriptType = context.GetTypeScriptType(baseProperty.PropertyType),
                     PropertyInfo = baseProperty,
-                    Expose = true
+                    IsDeclared = true
                 })
                 .ToArray();
             foreach (var baseProperty in properties)
             {
-                data.ConstructorArgs.Add(baseProperty);
+                data.Properties.Add(baseProperty);
             }
         }
 
@@ -100,17 +140,17 @@ export{(type.GetTypeInfo().IsAbstract ? " abstract" : "")} class {name}{data.Cla
                         BindingFlags.SetProperty | 
                         BindingFlags.GetProperty)
                     .Where(x => context.Configuration.ShouldConvertProperty(type, x))
-                    .Select(baseProperty => new ConstructorArg
+                    .Select(baseProperty => new Property
                     {
                         Name = context.Configuration.GetPropertyName(type.GetTypeInfo().BaseType, baseProperty),
                         TypeScriptType = context.GetTypeScriptType(baseProperty.PropertyType),
                         PropertyInfo = baseProperty,
-                        Expose = !context.Configuration.ClassConfiguration.ApplyInheritance
+                        IsDeclared = !context.Configuration.ClassConfiguration.ApplyInheritance
                     })
                     .ToArray();
                 foreach (var baseProperty in baseProperties)
                 {
-                    data.ConstructorArgs.Add(baseProperty);
+                    data.Properties.Add(baseProperty);
                 }
                 
                 if (context.Configuration.ClassConfiguration.ApplyInheritance)

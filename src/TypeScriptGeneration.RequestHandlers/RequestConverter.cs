@@ -30,19 +30,19 @@ namespace TypeScriptGeneration.RequestHandlers
                 .Select(x => new
                 {
                     Original = x,
-                    Parsed = data.ConstructorArgs.Single(p => p.PropertyInfo == x.PropertyInfo)
+                    Parsed = data.Properties.Single(p => p.PropertyInfo == x.PropertyInfo)
                 }).ToArray();
             var routeParameters = parsed.Parameters.Where(x => x.BindingType == BindingType.FromRoute)
                 .Select(x => new
                 {
                     Original = x,
-                    Parsed = data.ConstructorArgs.Single(p => p.PropertyInfo == x.PropertyInfo)
+                    Parsed = data.Properties.Single(p => p.PropertyInfo == x.PropertyInfo)
                 }).ToArray();
             var bodyParameters = parsed.Parameters.Where(x => x.BindingType == BindingType.FromBody)
                 .Select(x => new
                 {
                     Original = x,
-                    Parsed = data.ConstructorArgs.Single(p => p.PropertyInfo == x.PropertyInfo)
+                    Parsed = data.Properties.Single(p => p.PropertyInfo == x.PropertyInfo)
                 }).ToArray();
 
             var httpRequestType = typeof(IHttpRequest<>).MakeGenericType(parsed.Definition.ResponseType);
