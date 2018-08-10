@@ -25,9 +25,9 @@ namespace TypeScriptGeneration.RequestHandlers
     {PropName(context, type, nameof(IHttpRequest<object>.Body))}: {
                     context.GetTypeScriptType(typeof(object)).ToTypeScriptType()
                 };
-    {PropName(context, type, nameof(IHttpRequest<object>.QueryString))}: {
-                    context.GetTypeScriptType(typeof(Dictionary<string, string>)).ToTypeScriptType()
-                };
+    {PropName(context, type, nameof(IHttpRequest<object>.QueryString))}: {{
+        [key: string]: string | string[];
+    }};
 }}";
         }
 

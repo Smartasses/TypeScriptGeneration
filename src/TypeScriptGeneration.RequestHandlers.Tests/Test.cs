@@ -29,7 +29,9 @@ namespace TypeScriptGeneration.RequestHandlers.Tests
     method: string;
     route: string;
     body: any;
-    queryString: { [key: string]: string };
+    queryString: {
+        [key: string]: string | string[];
+    };
 }"},
                 {"IRequestDispatcher.ts", @"import { Observable } from 'rxjs/index';
 import { IHttpRequest } from './IHttpRequest';
@@ -46,12 +48,14 @@ export class TestRequest {
         public id?: string) {
     }
 
-    private __request = () => <IHttpRequest<TestResponse>>{
-        method: 'get',
-        route: 'api/values/{Id}'.replace('{Id}', this.id ? this.id.toString() : ''),
-        body: undefined,
-        queryString: {
-        }
+    private __request = () => {
+        const req: IHttpRequest<TestResponse> = {
+            method: 'get',
+            route: 'api/values/{Id}'.replace('{Id}', this.id ? this.id.toString() : ''),
+            body: undefined,
+            queryString: {}
+        };
+        return req;
     }
     public execute = (dispatcher: IRequestDispatcher) => dispatcher.execute(this.__request());
 }"},

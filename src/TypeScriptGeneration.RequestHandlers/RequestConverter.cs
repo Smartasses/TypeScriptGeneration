@@ -5,6 +5,7 @@ using Common.RequestHandlers;
 using RequestHandlers;
 using RequestHandlers.Http;
 using TypeScriptGeneration.Converters;
+using TypeScriptGeneration.TypeScriptTypes;
 using IRequestDispatcher = RequestHandlers.IRequestDispatcher;
 
 namespace TypeScriptGeneration.RequestHandlers
@@ -56,23 +57,34 @@ namespace TypeScriptGeneration.RequestHandlers
         {prop.Parsed.Name}: this.{prop.Parsed.Name},").TrimEnd(',')
                 }
     }}";
+            var queryStringPropertyName = PropName(context, httpRequestType, nameof(IHttpRequest<object>.QueryString));
+            var methodPropertyName = PropName(context, httpRequestType, nameof(IHttpRequest<object>.Method));
+            var routePropertyName = PropName(context, httpRequestType, nameof(IHttpRequest<object>.Route));
+            var bodyPropertyName = PropName(context, httpRequestType, nameof(IHttpRequest<object>.Body));
             var code = $@"
-private __request = () => <{context.GetTypeScriptType(httpRequestType).ToTypeScriptType()}>{{
-    {PropName(context, httpRequestType, nameof(IHttpRequest<object>.Method))}: '{
-                    parsed.HttpMethod.ToString().ToLower()
-                }',
-    {PropName(context, httpRequestType, nameof(IHttpRequest<object>.Route))}: '{parsed.Route}'{replaceRouteArgs},
-    {PropName(context, httpRequestType, nameof(IHttpRequest<object>.Body))}: {(hasBody ? body : "undefined")},
-    {PropName(context, httpRequestType, nameof(IHttpRequest<object>.QueryString))}: {{{
-                    _.Foreach(queryStringParameters, prop => $@"
-        {prop.Parsed.Name}: this.{prop.Parsed.Name} ? this.{prop.Parsed.Name}.toString() : null,").TrimEnd(',')
-                }
-    }}
+private __request = () => {{
+    const req: {context.GetTypeScriptType(httpRequestType).ToTypeScriptType()} = {{
+        {methodPropertyName}: '{parsed.HttpMethod.ToString().ToLower()}',
+        {routePropertyName}: '{parsed.Route}'{replaceRouteArgs},
+        {bodyPropertyName}: {(hasBody ? body : "undefined")},
+        {queryStringPropertyName}: {{}}
+    }};{_.Foreach(queryStringParameters, prop => $@"
+    req.{queryStringPropertyName}['{prop.Parsed.Name}'] = {GetQueryStringValue(prop.Parsed)}")}
+    return req;
 }}
 public execute = (dispatcher: {
                     context.GetTypeScriptType(typeof(IRequestDispatcher)).ToTypeScriptType()
                 }) => dispatcher.execute(this.__request());";
             data.Body.AddRange(code.Replace("\r\n", "\n").Split('\n'));
+        }
+
+        private static string GetQueryStringValue(Property parsed)
+        {
+            if (parsed.TypeScriptType is ArrayTypeScriptType)
+            {
+                return $"this.{parsed.Name} ? this.{parsed.Name}.map(i => i ? i.toString() : null).filter(i => typeof i === 'string') : null;";
+            }
+            return $"this.{parsed.Name} ? this.{parsed.Name}.toString() : null;";
         }
 
         private static string PropName(ILocalConvertContext context, Type httpRequestType, string name)
