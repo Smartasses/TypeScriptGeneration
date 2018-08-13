@@ -48,6 +48,7 @@ export class TestRequest {
         public id?: string) {
     }
 
+    public __name = 'TestRequest';
     private __request = () => {
         const req: IHttpRequest<TestResponse> = {
             method: 'get',
