@@ -62,6 +62,7 @@ namespace TypeScriptGeneration.RequestHandlers
             var routePropertyName = PropName(context, httpRequestType, nameof(IHttpRequest<object>.Route));
             var bodyPropertyName = PropName(context, httpRequestType, nameof(IHttpRequest<object>.Body));
             var code = $@"
+public __name = '{context.Configuration.GetTypeName(type)}';
 private __request = () => {{
     const req: {context.GetTypeScriptType(httpRequestType).ToTypeScriptType()} = {{
         {methodPropertyName}: '{parsed.HttpMethod.ToString().ToLower()}',
