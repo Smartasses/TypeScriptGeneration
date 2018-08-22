@@ -1,17 +1,24 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Common.RequestHandlers;
 using RequestHandlers;
 using RequestHandlers.Http;
 using TypeScriptGeneration.Converters;
-using TypeScriptGeneration.TypeScriptTypes;
 using IRequestDispatcher = RequestHandlers.IRequestDispatcher;
 
 namespace TypeScriptGeneration.RequestHandlers
 {
     public class RequestConverter : ClassConverter
     {
+        private readonly Func<IEnumerable<Property>, string, ILocalConvertContext, string> _getQueryStringLines;
+        
+        public RequestConverter(Func<IEnumerable<Property>, string, ILocalConvertContext, string> getQueryStringLines = null)
+        {
+            _getQueryStringLines = getQueryStringLines ?? AspNetQueryStringConverter.GetQueryStringLines;
+        }
+        
         public override bool CanConvertType(Type type)
         {
             return base.CanConvertType(type) && type.GetTypeInfo().GetCustomAttribute<HttpRequestAttribute>() != null;
@@ -24,27 +31,12 @@ namespace TypeScriptGeneration.RequestHandlers
             {
                 throw new ArgumentNullException("attr cannot be null");
             }
+
             var parsed = new HttpRequestHandlerDefinition(attr, new RequestAndResponse(type));
 
-
-            var queryStringParameters = parsed.Parameters.Where(x => x.BindingType == BindingType.FromQuery)
-                .Select(x => new
-                {
-                    Original = x,
-                    Parsed = data.Properties.Single(p => p.PropertyInfo == x.PropertyInfo)
-                }).ToArray();
-            var routeParameters = parsed.Parameters.Where(x => x.BindingType == BindingType.FromRoute)
-                .Select(x => new
-                {
-                    Original = x,
-                    Parsed = data.Properties.Single(p => p.PropertyInfo == x.PropertyInfo)
-                }).ToArray();
-            var bodyParameters = parsed.Parameters.Where(x => x.BindingType == BindingType.FromBody)
-                .Select(x => new
-                {
-                    Original = x,
-                    Parsed = data.Properties.Single(p => p.PropertyInfo == x.PropertyInfo)
-                }).ToArray();
+            var queryStringParameters = ParseProperties(data, parsed, BindingType.FromQuery);
+            var routeParameters = ParseProperties(data, parsed, BindingType.FromRoute);
+            var bodyParameters = ParseProperties(data, parsed, BindingType.FromBody);
 
             var httpRequestType = typeof(IHttpRequest<>).MakeGenericType(parsed.Definition.ResponseType);
 
@@ -69,8 +61,8 @@ private __request = () => {{
         {routePropertyName}: '{parsed.Route}'{replaceRouteArgs},
         {bodyPropertyName}: {(hasBody ? body : "undefined")},
         {queryStringPropertyName}: {{}}
-    }};{_.Foreach(queryStringParameters, prop => $@"
-    req.{queryStringPropertyName}['{prop.Parsed.Name}'] = {GetQueryStringValue(prop.Parsed)}")}
+    }};
+{_getQueryStringLines(queryStringParameters.Select(x => x.Parsed), queryStringPropertyName, context)}
     return req;
 }}
 public execute = (dispatcher: {
@@ -79,18 +71,27 @@ public execute = (dispatcher: {
             data.Body.AddRange(code.Replace("\r\n", "\n").Split('\n'));
         }
 
-        private static string GetQueryStringValue(Property parsed)
+        private static IEnumerable<ParsedProperty> ParseProperties(Data data, HttpRequestHandlerDefinition requestHandlerDefinition, BindingType bindingType)
         {
-            if (parsed.TypeScriptType is ArrayTypeScriptType)
-            {
-                return $"this.{parsed.Name} ? this.{parsed.Name}.map(i => i ? i.toString() : null).filter(i => typeof i === 'string') : null;";
-            }
-            return $"this.{parsed.Name} ? this.{parsed.Name}.toString() : null;";
+            var propertyBindings = requestHandlerDefinition.Parameters.Where(x => x.BindingType == bindingType);
+            return propertyBindings.Select(x => new ParsedProperty(x, data.Properties.Single(p => p.PropertyInfo == x.PropertyInfo)));
         }
 
         private static string PropName(ILocalConvertContext context, Type httpRequestType, string name)
         {
             return context.Configuration.GetPropertyName(httpRequestType, httpRequestType.GetProperty(name));
+        }
+
+        class ParsedProperty
+        {
+            public ParsedProperty(HttpPropertyBinding original, Property parsed)
+            {
+                Original = original;
+                Parsed = parsed;
+            }
+
+            public HttpPropertyBinding Original { get; set; }
+            public Property Parsed { get; set; }
         }
 
         class RequestAndResponse : IRequestDefinition
@@ -108,8 +109,4 @@ public execute = (dispatcher: {
             public Type ResponseType { get; set; }
         }
     }
-}
-
-namespace Common.RequestHandlers
-{
 }
