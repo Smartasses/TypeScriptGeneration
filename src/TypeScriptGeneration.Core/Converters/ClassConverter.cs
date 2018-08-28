@@ -76,13 +76,19 @@ export{(type.GetTypeInfo().IsAbstract ? " abstract" : "")} class {name}{data.Cla
             {
                 var propertyName = context.Configuration.GetPropertyName(type, subTypesAndDiscriminator.DiscriminatorProperty);
                 var tsType = context.GetTypeScriptType(subTypesAndDiscriminator.DiscriminatorProperty.PropertyType);
+                if (subTypesAndDiscriminator.DiscriminatorValue != null)
+                {
+                    data.Body.Add($"public {propertyName}: {tsType.ToTypeScriptType()} = {GetTypeScriptValue(subTypesAndDiscriminator.DiscriminatorValue, subTypesAndDiscriminator.DiscriminatorProperty.PropertyType, context)};");
+                }
+                else
+                {
+                    data.Body.Add($"public {propertyName}: {tsType.ToTypeScriptType()};");
+                }
                 
-                data.Body.Add($"public {propertyName}: {tsType.ToTypeScriptType()} = {GetTypeScriptValue(subTypesAndDiscriminator.DiscriminatorValue, subTypesAndDiscriminator.DiscriminatorProperty.PropertyType, context)};");
-
                 
                 foreach (var subTypes in subTypesAndDiscriminator.SubTypesWithDiscriminatorValue)
                 {
-                    context.GetTypeScriptType(subTypes.Key);
+                    context.GetTypeScriptType(subTypes.Key, false);
                 }
             }
         }

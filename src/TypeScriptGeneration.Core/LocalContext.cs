@@ -25,7 +25,7 @@ namespace TypeScriptGeneration
         public Dictionary<Type, TypeScriptResult> Imports { get; }
         public Dictionary<TypeScriptType[], string> ExternalImports { get; }
         
-        public TypeScriptType GetTypeScriptType(Type type)
+        public TypeScriptType GetTypeScriptType(Type type, bool import = true)
         {
             {
                 if (!Configuration.ShouldConvertType(type))
@@ -80,7 +80,7 @@ namespace TypeScriptGeneration
                     var typedefinition = actualType.GetGenericTypeDefinition();
                     var typeDefinition = GetTypeScriptType(typedefinition);
                     var genericArguments = actualType.GetTypeInfo().GetGenericArguments();
-                    return TypeScriptType.Generic(GetTypeScriptType(typedefinition), genericArguments.Select(GetTypeScriptType).ToArray());
+                    return TypeScriptType.Generic(GetTypeScriptType(typedefinition), genericArguments.Select(x => GetTypeScriptType(x)).ToArray());
                 }
             }
 
@@ -94,7 +94,11 @@ namespace TypeScriptGeneration
             {
                 if (!Imports.TryGetValue(actualType, out var result))
                 {
-                    Imports.Add(actualType, _convertContext.GetTypeScriptFile(actualType));
+                    var typeScriptResult = _convertContext.GetTypeScriptFile(actualType);
+                    if (import)
+                    {
+                        Imports.Add(actualType, typeScriptResult);
+                    }
                 }
                 return new BuiltInTypeScriptType(Configuration.GetTypeName(actualType));
             }

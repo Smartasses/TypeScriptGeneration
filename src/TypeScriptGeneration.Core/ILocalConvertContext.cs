@@ -6,7 +6,7 @@ namespace TypeScriptGeneration
 {
     public interface ILocalConvertContext
     {
-        TypeScriptType GetTypeScriptType(Type t);
+        TypeScriptType GetTypeScriptType(Type t, bool convert = true);
         ConvertConfiguration Configuration { get; }
         Dictionary<Type, TypeScriptResult> Imports { get; }
         Dictionary<TypeScriptType[], string> ExternalImports { get; }
