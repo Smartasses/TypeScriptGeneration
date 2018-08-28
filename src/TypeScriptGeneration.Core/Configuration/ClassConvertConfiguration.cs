@@ -16,7 +16,7 @@ namespace TypeScriptGeneration
 
         public GenerateConstructorType GenerateConstructorType { get; set; } = GenerateConstructorType.ArgumentPerProperty;
         
-        public InheritanceDiscriminatorConfiguration InheritanceConfig { get; } = new InheritanceDiscriminatorConfiguration();
+        public InheritanceDiscriminatorConfiguration InheritanceConfig { get; set; } = new InheritanceDiscriminatorConfiguration();
         
     }
 }

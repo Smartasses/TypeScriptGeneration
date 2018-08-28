@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using TypeScriptGeneration.TypeScriptTypes;
@@ -76,7 +77,7 @@ export{(type.GetTypeInfo().IsAbstract ? " abstract" : "")} class {name}{data.Cla
                 var propertyName = context.Configuration.GetPropertyName(type, subTypesAndDiscriminator.DiscriminatorProperty);
                 var tsType = context.GetTypeScriptType(subTypesAndDiscriminator.DiscriminatorProperty.PropertyType);
                 
-                data.Body.Add($"public {propertyName}: {tsType.ToTypeScriptType()} = \"{subTypesAndDiscriminator.DiscriminatorValue}\";");
+                data.Body.Add($"public {propertyName}: {tsType.ToTypeScriptType()} = {GetTypeScriptValue(subTypesAndDiscriminator.DiscriminatorValue, subTypesAndDiscriminator.DiscriminatorProperty.PropertyType, context)};");
 
                 
                 foreach (var subTypes in subTypesAndDiscriminator.SubTypesWithDiscriminatorValue)
@@ -84,6 +85,27 @@ export{(type.GetTypeInfo().IsAbstract ? " abstract" : "")} class {name}{data.Cla
                     context.GetTypeScriptType(subTypes.Key);
                 }
             }
+        }
+
+        private string GetTypeScriptValue(object discriminatorValue, Type type, ILocalConvertContext context)
+        {
+            var typeScriptType = context.GetTypeScriptType(type);
+            var typeScriptTypeStr = typeScriptType.ToTypeScriptType();
+            if (type.IsEnum)
+            {
+                return $"{typeScriptTypeStr}.{discriminatorValue}";
+            }
+            else if (typeScriptTypeStr == "string")
+            {
+                return $"'{((string) discriminatorValue).Replace("'", "\\'")}'";
+            } else if (typeScriptTypeStr == "numeric")
+            {
+                return string.Format(CultureInfo.InvariantCulture, "{0}", discriminatorValue);
+            }else if (typeScriptTypeStr == "boolean")
+            {
+                return Equals(discriminatorValue, true) ? "true" : "false";
+            }
+            throw new NotSupportedException();
         }
 
         private static string GeneratePropertiesAndConstructor(ILocalConvertContext context, Data data)
@@ -99,9 +121,9 @@ export{(type.GetTypeInfo().IsAbstract ? " abstract" : "")} class {name}{data.Cla
         {arg.Name}?: {arg.TypeScriptType.ToTypeScriptType()},").TrimEnd(',')}
     }}";
 
-                    data.ConstructorLines.InsertRange(0,
+                    data.ConstructorLines.AddRange(
                         new[] {"if (init) {"}
-                            .Concat(data.Properties.Select(x => $"    this.{x.Name} = init.{x.Name};"))
+                            .Concat(data.Properties.Where(x => x.IsDeclared).Select(x => $"    this.{x.Name} = init.{x.Name};"))
                             .Concat(new[] {"}"}));
                 }
                 else
@@ -185,7 +207,9 @@ export{(type.GetTypeInfo().IsAbstract ? " abstract" : "")} class {name}{data.Cla
                 
                 if (context.Configuration.ClassConfiguration.ApplyInheritance)
                 {
-                    var superCall = $"super({string.Join(", ", baseProperties.Select(x => x.Name))});";
+                    var baseParameters = context.Configuration.ClassConfiguration.GenerateConstructorType == GenerateConstructorType.ObjectInitializer 
+                        ? "init" : string.Join(", ", baseProperties.Select(x => x.Name));
+                    var superCall = $"super({baseParameters});";
                     data.ConstructorLines.Add(superCall);
                     var baseType = context.GetTypeScriptType(type.GetTypeInfo().BaseType);
                     data.ClassSuffix += $" extends {baseType.ToTypeScriptType()}";                    
