@@ -1,4 +1,5 @@
-﻿using FluentAssertions;
+﻿using System.Configuration;
+using FluentAssertions;
 using TypeScriptGeneration.Converters;
 using Xunit;
 
@@ -103,6 +104,37 @@ export class InheritanceSample extends SimpleClass {
         class InheritanceSample : SimpleClass
         {
             public bool IsAwesome { get; set; }
+        }
+        
+        
+        [Fact]
+        public void InheritanceDiscriminatorTest()
+        {
+            var ctx = new ConvertContext();
+            ctx.Configuration.ClassConfiguration.InheritanceConfig
+                .Add<BaseClassWithDiscriminator>(x => x.Discriminator, 
+                    typeof(InheritanceDiscriminatorSample));
+            
+            var result = new ClassConverter().ConvertType(typeof(InheritanceDiscriminatorSample), new LocalContext(ctx.Configuration, ctx, typeof(InheritanceSample)));
+            result.Should().BeLike(@"
+export class InheritanceDiscriminatorSample extends BaseClassWithDiscriminator {
+    constructor(
+        super();
+    }
+    public discriminator: string = ""inherit"";
+}");
+
+            ctx.GeneratedResults.Should().HaveCount(1);
+        }
+
+        class InheritanceDiscriminatorSample : BaseClassWithDiscriminator
+        {
+            public override string Discriminator { get; } = "inherit";
+        }
+
+        class BaseClassWithDiscriminator
+        {
+            public virtual string Discriminator { get; } = "base";
         }
     }
 }

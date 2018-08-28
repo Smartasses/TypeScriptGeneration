@@ -1,3 +1,5 @@
+using System;
+
 namespace TypeScriptGeneration
 {
     public class ClassConvertConfiguration
@@ -13,12 +15,8 @@ namespace TypeScriptGeneration
         public bool GenerateAsInterface { get; set; } = false;
 
         public GenerateConstructorType GenerateConstructorType { get; set; } = GenerateConstructorType.ArgumentPerProperty;
-    }
-
-    public enum GenerateConstructorType
-    {
-        None = 0,
-        ArgumentPerProperty,
-        ObjectInitializer
+        
+        public InheritanceDiscriminatorConfiguration InheritanceConfig { get; } = new InheritanceDiscriminatorConfiguration();
+        
     }
 }
