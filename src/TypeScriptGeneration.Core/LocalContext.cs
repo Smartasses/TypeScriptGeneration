@@ -27,81 +27,64 @@ namespace TypeScriptGeneration
         
         public TypeScriptType GetTypeScriptType(Type type, bool import = true)
         {
+            if (!Configuration.ShouldConvertType(type))
             {
-                if (!Configuration.ShouldConvertType(type))
-                {
-                    return TypeScriptType.Any;
-                }
+                return TypeScriptType.Any;
             }
             
+            if (Configuration.PredefinedMapping.IsPredefined(type, out var typeResult))
             {
-                if (Configuration.PredefinedMapping.IsPredefined(type, out var result))
-                {
-                    return result;
-                }                
+                return typeResult;
             }
                 
             var actualType = Nullable.GetUnderlyingType(type) ?? type;
     
+            if (Configuration.PredefinedMapping.IsPredefined(actualType, out var actualResult))
             {
-                if (Configuration.PredefinedMapping.IsPredefined(actualType, out var result))
-                {
-                    return result;
-                }                
+                return actualResult;
             }
     
+            var dictionary = TypeHelper.GetDictionaryType(actualType);
+            if (dictionary != null)
             {
-                var dictionary = TypeHelper.GetDictionaryType(actualType);
-                if (dictionary != null)
-                {
-                    return TypeScriptType.Dictionary(GetTypeScriptType(dictionary.GetTypeInfo().GetGenericArguments()[0]), GetTypeScriptType(dictionary.GetTypeInfo().GetGenericArguments()[1]));
-                }                
+                return TypeScriptType.Dictionary(GetTypeScriptType(dictionary.GetTypeInfo().GetGenericArguments()[0]), GetTypeScriptType(dictionary.GetTypeInfo().GetGenericArguments()[1]));
             }
     
+            var enumerable = TypeHelper.GetEnumerableType(actualType);
+            if (enumerable != null)
             {
-                var enumerable = TypeHelper.GetEnumerableType(actualType);
-                if (enumerable != null)
-                {
-                    return TypeScriptType.Array(GetTypeScriptType(enumerable.GetTypeInfo().GetGenericArguments()[0]));
-                }
+                return TypeScriptType.Array(GetTypeScriptType(enumerable.GetTypeInfo().GetGenericArguments()[0]));
             }
     
+            var taskType = TypeHelper.GetTaskType(actualType);
+            if (taskType != null)
             {
-                var taskType = TypeHelper.GetTaskType(actualType);
-                if (taskType != null)
-                {
-                    return GetTypeScriptType(taskType.GetTypeInfo().GetGenericArguments()[0]);
-                }
+                return GetTypeScriptType(taskType.GetTypeInfo().GetGenericArguments()[0]);
             }
 
+            if (actualType.IsConstructedGenericType)
             {
-                if (actualType.IsConstructedGenericType)
-                {
-                    var typedefinition = actualType.GetGenericTypeDefinition();
-                    var typeDefinition = GetTypeScriptType(typedefinition);
-                    var genericArguments = actualType.GetTypeInfo().GetGenericArguments();
-                    return TypeScriptType.Generic(GetTypeScriptType(typedefinition), genericArguments.Select(x => GetTypeScriptType(x)).ToArray());
-                }
+                var typeDefinition = actualType.GetGenericTypeDefinition();
+                var tsTypeDefinition = GetTypeScriptType(typeDefinition);
+                var genericArguments = actualType.GetTypeInfo().GetGenericArguments();
+                return TypeScriptType.Generic(tsTypeDefinition, genericArguments.Select(x => GetTypeScriptType(x)).ToArray());
             }
 
+            if (actualType.IsGenericParameter)
             {
-                if (actualType.IsGenericParameter)
-                {
-                    return new BuiltInTypeScriptType(actualType.Name);
-                }
+                return new BuiltInTypeScriptType(actualType.Name);
             }
 
+            if (_type != type && !Imports.ContainsKey(actualType))
             {
-                if (!Imports.TryGetValue(actualType, out var result))
+                var typeScriptResult = _convertContext.GetTypeScriptFile(actualType);
+                if (import)
                 {
-                    var typeScriptResult = _convertContext.GetTypeScriptFile(actualType);
-                    if (import)
-                    {
-                        Imports.Add(actualType, typeScriptResult);
-                    }
+                    Imports.Add(actualType, typeScriptResult);
                 }
-                return new BuiltInTypeScriptType(Configuration.GetTypeName(actualType));
             }
+            
+            return new BuiltInTypeScriptType(Configuration.GetTypeName(actualType));
         }
     }
 }
