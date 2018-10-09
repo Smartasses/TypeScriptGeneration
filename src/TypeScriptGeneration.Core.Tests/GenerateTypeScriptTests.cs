@@ -31,9 +31,10 @@ export class Employee extends Person {
     constructor(
         firstName?: string,
         lastName?: string,
+        children?: Array<Person>,
         public salary?: number,
         public hello?: GenericInheritance<MyGenericTest<string>, string>) {
-        super(firstName, lastName);
+        super(firstName, lastName, children);
     }
 }"},
                 {"Employer.ts", @"import { Person } from './dto/person/Person';
@@ -42,8 +43,9 @@ export class Employer extends Person {
     constructor(
         firstName?: string,
         lastName?: string,
+        children?: Array<Person>,
         public companyName?: string) {
-        super(firstName, lastName);
+        super(firstName, lastName, children);
     }
 }"},
                 {"GenericInheritance.ts", @"import { MyGenericTest } from './MyGenericTest';
@@ -64,7 +66,8 @@ export class GenericInheritance<T1, T2> extends MyGenericTest<T2> {
                 {"dto/person/Person.ts", @"export abstract class Person {
     constructor(
         public firstName?: string,
-        public lastName?: string) {
+        public lastName?: string,
+        public children?: Array<Person>) {
     }
 }
 "},
@@ -80,6 +83,7 @@ export class GenericInheritance<T1, T2> extends MyGenericTest<T2> {
         {
             public string FirstName { get; set; }
             public string LastName { get; set; }
+            public List<Person> Children { get; set; }
         }
 
         public class Employee : Person

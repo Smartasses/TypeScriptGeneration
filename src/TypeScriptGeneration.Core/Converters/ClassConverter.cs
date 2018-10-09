@@ -108,10 +108,12 @@ export{(type.GetTypeInfo().IsAbstract ? " abstract" : "")} class {name}{data.Cla
             else if (typeScriptTypeStr == "string")
             {
                 return $"'{((string) discriminatorValue).Replace("'", "\\'")}'";
-            } else if (typeScriptTypeStr == "numeric")
+            }
+            else if (typeScriptTypeStr == "numeric")
             {
                 return string.Format(CultureInfo.InvariantCulture, "{0}", discriminatorValue);
-            }else if (typeScriptTypeStr == "boolean")
+            }
+            else if (typeScriptTypeStr == "boolean")
             {
                 return Equals(discriminatorValue, true) ? "true" : "false";
             }
@@ -121,7 +123,7 @@ export{(type.GetTypeInfo().IsAbstract ? " abstract" : "")} class {name}{data.Cla
         private static string GeneratePropertiesAndConstructor(ILocalConvertContext context, Data data)
         {
             bool generateProperties = true;
-            string constructorArguments;
+            string constructorArguments = null;
             if (context.Configuration.ClassConfiguration.GenerateConstructorType
                 == GenerateConstructorType.ObjectInitializer)
             {
@@ -136,10 +138,6 @@ export{(type.GetTypeInfo().IsAbstract ? " abstract" : "")} class {name}{data.Cla
                             .Concat(data.Properties.Where(x => x.IsDeclared).Select(x => $"    this.{x.Name} = init.{x.Name};"))
                             .Concat(new[] {"}"}));
                 }
-                else
-                {
-                    constructorArguments = "";
-                }
             }
             else if (context.Configuration.ClassConfiguration.GenerateConstructorType ==
                      GenerateConstructorType.ArgumentPerProperty)
@@ -147,10 +145,6 @@ export{(type.GetTypeInfo().IsAbstract ? " abstract" : "")} class {name}{data.Cla
                 constructorArguments = _.Foreach(data.Properties, arg => $@"
         {(arg.IsDeclared ? "public " : "")}{arg.Name}?: {arg.TypeScriptType.ToTypeScriptType()},").TrimEnd(',');
                 generateProperties = false;
-            }
-            else
-            {
-                constructorArguments = "";
             }
 
             if (generateProperties)
@@ -162,7 +156,7 @@ export{(type.GetTypeInfo().IsAbstract ? " abstract" : "")} class {name}{data.Cla
                             $"public {property.Name}: {property.TypeScriptType.ToTypeScriptType()};"));
             }
 
-            return constructorArguments;
+            return string.IsNullOrEmpty(constructorArguments) ? "" : constructorArguments;
         }
 
         protected virtual void AdditionalGeneration(Data data, Type type, ILocalConvertContext context)
