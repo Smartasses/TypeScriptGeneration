@@ -34,7 +34,7 @@ namespace TypeScriptGeneration.Converters
         
         public virtual bool CanConvertType(Type type)
         {
-            return type.GetTypeInfo().IsClass && !type.IsConstructedGenericType;
+            return type.IsClass || type.IsValueType;
         }
         
         public string ConvertType(Type type, ILocalConvertContext context)
