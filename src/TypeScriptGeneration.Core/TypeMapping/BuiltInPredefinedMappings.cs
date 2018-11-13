@@ -30,8 +30,9 @@ namespace TypeScriptGeneration.TypeMapping
                 // Boolean types
                 { typeof(Boolean), TypeScriptType.Boolean },
                 
-                // Date types
+                // Date and timespan types
                 { typeof(DateTime), TypeScriptType.Date },
+                { typeof(DateTimeOffset), TypeScriptType.Date },
                 
                 // Any types
                 { typeof(object), TypeScriptType.Any }

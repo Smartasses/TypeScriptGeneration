@@ -53,15 +53,18 @@ namespace TypeScriptGeneration
                 _generatedTypes.Add(type, result);
                 try
                 {
-                    var converter = Configuration.Converters.First(x => x.CanConvertType(type));
+                    var converter = Configuration.Converters.FirstOrDefault(x => x.CanConvertType(type));
+                    if (converter == null)
+                        throw new InvalidOperationException($"No converter found for type '{type.Name}'.");
+                    
                     var ts = converter.ConvertType(type, localContext);
                     result.Imports = localContext.Imports.Values;
                     result.ExternalImports = localContext.ExternalImports;
                     result.Content = ts.Trim();
                 }
-                catch
+                catch (Exception ex)
                 {
-                    throw new Exception($"Failed to convert {type}");
+                    throw new Exception($"Failed to convert {type}.", ex);
                 }
             }
             return result;
