@@ -85,9 +85,13 @@ namespace TypeScriptGeneration
                     }
                     foreach (var import in typeScriptResult.Imports)
                     {
-                        var relativePath = GetRelativePath(typeScriptResult.FilePath, import.FilePath);
+                        sb.Append("import { ");
+                        sb.Append(import.TypeScriptResult.Type.GetCleanName());
+                        if (!string.IsNullOrWhiteSpace(import.Alias))
+                            sb.Append($" as {import.Alias}");
                         
-                        sb.AppendLine($"import {{ {import.Type.GetCleanName()} }} from '{relativePath}';");
+                        var relativePath = GetRelativePath(typeScriptResult.FilePath, import.TypeScriptResult.FilePath);
+                        sb.AppendLine($" }} from '{relativePath}';");
                     }
                     sb.AppendLine();
                 }

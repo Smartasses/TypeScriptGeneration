@@ -49,7 +49,7 @@ namespace TypeScriptGeneration.RequestHandlers
         }
 
         private static void AppendQueryStringLines(this StringBuilder builder, string linePrefix, PropertyInfo propertyInfo,
-            IDictionary<Type, TypeScriptResult> imports, Func<Type, PropertyInfo, string> getTypescriptPropertyName,
+            IDictionary<Type, TypeScriptImport> imports, Func<Type, PropertyInfo, string> getTypescriptPropertyName,
             string propertyName, string queryStringPropertyName)
         {
             var defaultCondition = $"if (this.{propertyName})";
@@ -77,7 +77,7 @@ namespace TypeScriptGeneration.RequestHandlers
                     BindingFlags.GetProperty);
                 foreach (var innerPropertyInfo in innerProperties)
                 {
-                    var innerImports = import.Imports.ToDictionary(x => x.Type, x => x);
+                    var innerImports = import.TypeScriptResult.Imports.ToDictionary(x => x.TypeScriptResult.Type, x => x);
                     var newPropertyNamePart = getTypescriptPropertyName(propertyType, innerPropertyInfo);
                     var innerPropertyName = $"{propertyName}.{newPropertyNamePart}";
                     

@@ -8,7 +8,7 @@ namespace TypeScriptGeneration
     {
         TypeScriptType GetTypeScriptType(Type t, bool convert = true);
         ConvertConfiguration Configuration { get; }
-        Dictionary<Type, TypeScriptResult> Imports { get; }
+        Dictionary<Type, TypeScriptImport> Imports { get; }
         Dictionary<TypeScriptType[], string> ExternalImports { get; }
     }
 }

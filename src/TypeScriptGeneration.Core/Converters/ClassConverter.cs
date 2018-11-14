@@ -40,16 +40,15 @@ namespace TypeScriptGeneration.Converters
         public string ConvertType(Type type, ILocalConvertContext context)
         {
             var data = new Data();
-
+            var name = context.Configuration.GetTypeName(type);
             
-            AddBase(data, type, context);
+            AddBase(data, type, context, name);
             AddProperties(data, type, context);
             GenerateDiscriminator(data, type, context);
             
-            var name = context.Configuration.GetTypeName(type);
-            if (type.GetTypeInfo().IsGenericTypeDefinition)
+            if (type.IsGenericTypeDefinition)
             {
-                var args = type.GetTypeInfo().GetGenericArguments();
+                var args = type.GetGenericArguments();
                 name += $"<{string.Join(", ", args.Select(x => x.Name))}>";
             }
 
@@ -58,7 +57,7 @@ namespace TypeScriptGeneration.Converters
             var constructorArguments = GeneratePropertiesAndConstructor(context, data);
 
             var generated = $@"
-export{(type.GetTypeInfo().IsAbstract ? " abstract" : "")} class {name}{data.ClassSuffix} {{
+export{(type.IsAbstract ? " abstract" : "")} class {name}{data.ClassSuffix} {{
     constructor({constructorArguments}) {{{_.Foreach(data.ConstructorLines, line => $@"
         {line}")}
     }}{_.Foreach(data.Body, line => string.IsNullOrEmpty(line) ? @"
@@ -165,7 +164,7 @@ export{(type.GetTypeInfo().IsAbstract ? " abstract" : "")} class {name}{data.Cla
 
         protected void AddProperties(Data data, Type type, ILocalConvertContext context)
         {
-            var properties = type.GetTypeInfo().GetProperties(
+            var properties = type.GetProperties(
                     BindingFlags.DeclaredOnly | 
                     BindingFlags.Instance | 
                     BindingFlags.Public | 
@@ -174,7 +173,7 @@ export{(type.GetTypeInfo().IsAbstract ? " abstract" : "")} class {name}{data.Cla
                 .Where(x => context.Configuration.ShouldConvertProperty(type, x))
                 .Select(baseProperty => new Property
                 {
-                    Name = context.Configuration.GetPropertyName(type.GetTypeInfo().BaseType, baseProperty),
+                    Name = context.Configuration.GetPropertyName(type.BaseType, baseProperty),
                     TypeScriptType = context.GetTypeScriptType(baseProperty.PropertyType),
                     PropertyInfo = baseProperty,
                     IsDeclared = true
@@ -186,11 +185,11 @@ export{(type.GetTypeInfo().IsAbstract ? " abstract" : "")} class {name}{data.Cla
             }
         }
 
-        protected virtual void AddBase(Data data, Type type, ILocalConvertContext context)
+        protected virtual void AddBase(Data data, Type type, ILocalConvertContext context, string className)
         {
-            if (type.GetTypeInfo().BaseType != typeof(object))
+            if (type.BaseType != typeof(object))
             {
-                var baseProperties = type.GetTypeInfo().BaseType.GetTypeInfo().GetProperties(
+                var baseProperties = type.BaseType.GetProperties(
                         BindingFlags.Instance | 
                         BindingFlags.Public | 
                         BindingFlags.SetProperty | 
@@ -198,7 +197,7 @@ export{(type.GetTypeInfo().IsAbstract ? " abstract" : "")} class {name}{data.Cla
                     .Where(x => context.Configuration.ShouldConvertProperty(type, x))
                     .Select(baseProperty => new Property
                     {
-                        Name = context.Configuration.GetPropertyName(type.GetTypeInfo().BaseType, baseProperty),
+                        Name = context.Configuration.GetPropertyName(type.BaseType, baseProperty),
                         TypeScriptType = context.GetTypeScriptType(baseProperty.PropertyType),
                         PropertyInfo = baseProperty,
                         IsDeclared = !context.Configuration.ClassConfiguration.ApplyInheritance
@@ -211,12 +210,31 @@ export{(type.GetTypeInfo().IsAbstract ? " abstract" : "")} class {name}{data.Cla
                 
                 if (context.Configuration.ClassConfiguration.ApplyInheritance)
                 {
-                    var baseParameters = context.Configuration.ClassConfiguration.GenerateConstructorType == GenerateConstructorType.ObjectInitializer 
-                        ? "init" : string.Join(", ", baseProperties.Select(x => x.Name));
+                    string baseParameters;
+                    if (context.Configuration.ClassConfiguration.GenerateConstructorType == GenerateConstructorType.ObjectInitializer)
+                    {
+                        baseParameters = baseProperties.Any() ? "init" : "";
+                    }
+                    else
+                    {
+                        baseParameters = string.Join(", ", baseProperties.Select(x => x.Name));
+                    }
+                    
                     var superCall = $"super({baseParameters});";
                     data.ConstructorLines.Add(superCall);
-                    var baseType = context.GetTypeScriptType(type.GetTypeInfo().BaseType);
-                    data.ClassSuffix += $" extends {baseType.ToTypeScriptType()}";                    
+                    
+                    var baseType = context.GetTypeScriptType(type.BaseType);
+                    var baseTypescriptType = baseType.ToTypeScriptType();
+                    if (baseTypescriptType.Equals(className))
+                    {
+                        baseTypescriptType += "Base";
+                        if (context.Imports.ContainsKey(type.BaseType))
+                        {
+                            context.Imports[type.BaseType].Alias = baseTypescriptType;
+                        }
+                    }
+
+                    data.ClassSuffix += $" extends {baseTypescriptType}";                    
                 }
             }
         }

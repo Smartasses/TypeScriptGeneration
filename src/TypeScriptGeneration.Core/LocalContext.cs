@@ -18,11 +18,11 @@ namespace TypeScriptGeneration
             Configuration = configuration;
             _convertContext = convertContext;
             _type = type;
-            Imports = new Dictionary<Type, TypeScriptResult>();
+            Imports = new Dictionary<Type, TypeScriptImport>();
             ExternalImports = new Dictionary<TypeScriptType[], string>();
         }
         
-        public Dictionary<Type, TypeScriptResult> Imports { get; }
+        public Dictionary<Type, TypeScriptImport> Imports { get; }
         public Dictionary<TypeScriptType[], string> ExternalImports { get; }
         
         public TypeScriptType GetTypeScriptType(Type type, bool import = true)
@@ -80,7 +80,11 @@ namespace TypeScriptGeneration
                 var typeScriptResult = _convertContext.GetTypeScriptFile(actualType);
                 if (import)
                 {
-                    Imports.Add(actualType, typeScriptResult);
+                    var tsImport = new TypeScriptImport()
+                    {
+                        TypeScriptResult = typeScriptResult
+                    };
+                    Imports.Add(actualType, tsImport);
                 }
             }
             
