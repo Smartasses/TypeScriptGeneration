@@ -30,17 +30,14 @@ namespace TypeScriptGeneration
         {
             try
             {
-
                 var subTypes = _parentTypes[objectType];
                 var jToken = JToken.ReadFrom(reader);
                 if (jToken is JObject jObject &&
-                    jObject.TryGetValue(subTypes.DiscriminatorProperty.Name,
-                        StringComparison.CurrentCultureIgnoreCase,
-                        out var discriminatorValue))
+                    jObject.TryGetValue(subTypes.DiscriminatorProperty.Name, StringComparison.CurrentCultureIgnoreCase, out var discriminatorValue))
                 {
-                    var deserialized =
-                        discriminatorValue.ToObject(subTypes.DiscriminatorProperty.PropertyType, serializer);
+                    var deserialized = discriminatorValue.ToObject(subTypes.DiscriminatorProperty.PropertyType, serializer);
                     var subTypesFiltered = subTypes.SubTypesWithDiscriminatorValue.Where(x => Equals(x.Value, deserialized)).ToArray();
+                    
                     if (subTypesFiltered.Any())
                     {
                         var subType = subTypesFiltered.First();
@@ -48,10 +45,8 @@ namespace TypeScriptGeneration
                         {
                             return DeserializeBaseType(objectType, serializer, jObject);
                         }
-                        else
-                        {
-                            return DeserializeSubType(serializer, jObject, subType);
-                        }
+                        
+                        return DeserializeSubType(serializer, jObject, subType);
                     }
                 }
 
@@ -59,7 +54,7 @@ namespace TypeScriptGeneration
             }
             catch (Exception e)
             {
-                _onException(e);
+                _onException?.Invoke(e);
                 throw;
             }
         }
