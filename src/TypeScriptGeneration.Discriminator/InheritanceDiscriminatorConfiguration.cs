@@ -62,13 +62,65 @@ namespace TypeScriptGeneration
         {
             if (subType.IsClass && !subType.IsAbstract)
             {
-                var instance = Activator.CreateInstance(subType);
-                value = methodInfo.GetValue(instance);
-                return true;
+                try
+                {
+                    var instance = CreateInstance(subType);
+                    value = methodInfo.GetValue(instance);
+                    return true;
+                }
+                catch (Exception ex)
+                {
+                    var message = $"Could not create a new instance of type '{subType.Name}'. Make sure it has a parameterless constructor (doesn't need to be public) or it has only one constructor with parameters that accepts default values.";
+                    throw new MissingMethodException(message, ex);
+                }
             }
 
             value = null;
             return false;
+        }
+
+        private static object CreateInstance(Type type)
+        {
+            var constructor = GetConstructor(type);
+
+            try
+            {
+                var constructorParams = constructor.GetParameters().Select(p => GetParameterValue(p));
+                var instance = constructor.Invoke(constructorParams.ToArray());
+                return instance;
+            }
+            catch (Exception ex)
+            {
+                var message = $"Could not create a new instance of type '{type.Name}'. Make sure it has a parameterless constructor (doesn't need to be public) or it has only one constructor with parameters that accepts default values.";
+                throw new MissingMethodException(message, ex);
+            }
+        }
+
+        private static ConstructorInfo GetConstructor(Type type)
+        {
+            var constructors = type.GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
+            var constructor = constructors.FirstOrDefault(x => x.GetParameters().Length == 0);
+            if (constructor == null)
+            {
+                if (constructors.Length != 1)
+                {
+                    var message = $"Could not find a suitable constructor for type '{type.Name}'. Make sure it has a parameterless constructor (doesn't need to be public) or it has only one constructor with parameters that accepts default values.";
+                    throw new MissingMethodException(message);
+                }
+
+                constructor = constructors[0];
+            }
+
+            return constructor;
+        }
+
+        private static object GetParameterValue(ParameterInfo parameter)
+        {
+            if (parameter.HasDefaultValue)
+                return parameter.DefaultValue;
+            if (parameter.ParameterType.IsValueType && Nullable.GetUnderlyingType(parameter.ParameterType) == null)
+                return Activator.CreateInstance(parameter.ParameterType);
+            return null;
         }
 
         private PropertyInfo GetPropertyFromExpression<T>(Expression<Func<T, object>> expression)
